@@ -14,7 +14,8 @@
     "start:es6": "babel-node server/basic-server.js",
     "test": "mocha server/spec",
     "test:es6": "mocha --compilers js:babel-register server/spec",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "chatClient": "open -a 'Google Chrome' index.html"
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
@@ -31,6 +32,8 @@
     ]
   },
   "dependencies": {
-    "live-server": "^1.2.1"
+    "live-server": "^1.2.1",
+    "underscore": "^1.9.1",
+    "jquery": "^3.3.1"
   }
 }

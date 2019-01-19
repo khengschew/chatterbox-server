@@ -28,6 +28,8 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var storedData = [];
+
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -55,7 +57,38 @@ exports.requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
+
+  if (request.url !== '/classes/messages') {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
+
+  var resData = {results:[]};
+
+  if (request.method === 'GET') {
+
+    resData.results = storedData;
+    response.end(JSON.stringify(resData));
+
+  } else if (request.method === 'POST') {
+
+    // Get data
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk.toString('utf8');
+    }).on('end', () => {
+      // Perform operations on data
+      storedData.push(JSON.parse(body));
+    });
+
+    // change statusCode to 201
+    statusCode = 201;
+
+  } else if (request.method === 'OPTIONS') {
+
+  }
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -68,7 +101,7 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  response.end(JSON.stringify(resData));
 };
 
 
