@@ -12,6 +12,8 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var url = require('url');
+
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
 // are on different domains, for instance, your chat client.
@@ -29,6 +31,13 @@ var defaultCorsHeaders = {
 };
 
 var storedData = [];
+storedData.push({
+  username: 'Fred',
+  text: 'First!',
+  roomname: 'lobby',
+  createdAt: Date.now(),
+  objectId: 0
+});
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -59,7 +68,7 @@ exports.requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
 
-  if (request.url !== '/classes/messages') {
+  if (url.parse(request.url).pathname !== '/classes/messages') {
     statusCode = 404;
     response.writeHead(statusCode, headers);
     response.end();
@@ -67,22 +76,27 @@ exports.requestHandler = function(request, response) {
 
   var resData = {results:[]};
 
-  // Get data
-  // var body = '';
-  // request.on('data', (chunk) => {
-
-  //   body += chunk.toString('utf8');
-
-  // }).on('end', () => {
-
-  // });
-
   if (request.method === 'GET') {
 
     resData.results = storedData;
 
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(resData));
+
+    // Get data
+    // var body = '';
+    // request.on('data', (chunk) => {
+    //   body += chunk.toString('utf8');
+    // }).on('end', () => {
+    //   resData.results = storedData;
+
+    //   if (body) {
+    //     body = JSON.parse(body);
+    //   }
+
+    //   response.writeHead(statusCode, headers);
+    //   response.end(JSON.stringify(resData));
+    // });
 
   } else if (request.method === 'POST') {
 
@@ -94,8 +108,13 @@ exports.requestHandler = function(request, response) {
       // Perform operations on data
       body = JSON.parse(body);
       body.createdAt = Date.now();
+      body.objectId = storedData.length;
 
       storedData.push(body);
+      resData = {
+        'createdAt': body.createdAt,
+        'objectId': body.objectId
+      };
 
       // change statusCode to 201
       statusCode = 201;
@@ -105,7 +124,12 @@ exports.requestHandler = function(request, response) {
     });
 
   } else if (request.method === 'OPTIONS') {
+    response.writeHead(statusCode, headers);
+
     response.end();
+
+    // var optionsData = {};
+    // response.end(optionsData);
   }
 
   // .writeHead() writes to the request line and headers of the response,
